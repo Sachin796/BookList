@@ -50,6 +50,56 @@ class UI {
     document.getElementById("isbn").value = "";
   }
 }
+
+//Local Storage
+class LocalStorage {
+  static getBooks() {
+    let books;
+    if (localStorage.getItem("books") === null) {
+      books = [];
+    } else {
+      books = JSON.parse(localStorage.getItem("books"));
+      console.log(books);
+    }
+
+    return books;
+  }
+
+  static displayBooks() {
+    console.log("Inside nfjsdijf");
+    const books = LocalStorage.getBooks();
+    books.forEach(element => {
+      const ui = new UI();
+      ui.addBookToList(element);
+    });
+  }
+
+  static addBook(book) {
+    console.log(book);
+    const books = LocalStorage.getBooks();
+    console.log(books);
+    books.push(book);
+
+    localStorage.setItem("books", JSON.stringify(books));
+  }
+
+  static removeBooks(isbn) {
+    const books = LocalStorage.getBooks();
+    books.forEach((element, index) => {
+      if (element.isbn === isbn) {
+        books.splice(index, 1);
+      }
+    });
+    localStorage.setItem("books", JSON.stringify(books));
+  }
+}
+
+//Onload
+document.addEventListener("DOMContentLoaded", LocalStorage.displayBooks);
+
+// document.onload=function(){
+//     LocalStorage.displayBooks();
+// }
 //Event LIstener for add book
 document.getElementById("book-form").addEventListener("submit", function(e) {
   e.preventDefault();
@@ -70,6 +120,10 @@ document.getElementById("book-form").addEventListener("submit", function(e) {
     ui.showAlert("Please Provide data", "error");
   } else {
     ui.addBookToList(book);
+    console.log(book);
+    //Store in local storage
+    LocalStorage.addBook(book);
+
     ui.showAlert("Book added Sucessfully", "success");
     ui.clearData();
     document.getElementById("title").focus();
@@ -82,7 +136,14 @@ document.getElementById("book-list").addEventListener("click", function(e) {
   const ui = new UI();
   console.log(ui);
   console.log(e.target);
+  //Delete Book
   ui.deleteBook(e.target);
+
+  //Remove from local storage
+  LocalStorage.removeBooks(
+    e.target.parentElement.previousElementSibling.textContent
+  );
+
   //Show message
   ui.showAlert("Book Deleted successfully", "success");
 });
